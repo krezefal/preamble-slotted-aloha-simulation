@@ -1,150 +1,76 @@
 import matplotlib.pyplot as plt
-from colorama import Fore, Style
+import numpy as np
 
-from user import User
-from utils import *
-from vars import *
-
-
-def generate_requests(users: list, cur_slot: int):
-    for user in users:
-        user.update_requests(cur_slot)
+from aloha.aloha_conv import AlohaConv
+from aloha.aloha_ep import MultichannelAlohaEP
+from consts import SLOTS, USERS_COUNT, CHANNELS_COUNT, EP_LEN, VERBOSE
 
 
-def exploration_phase(users: list) -> BS_feedback:
-    channels_situation = {num: set() for num in range(CHANNELS)}
-    for user in users:
-        if user.is_active():
-            user.send_preamble(channels_situation)
+def main():
+    lambdas = np.arange(0.1, 2.1, 0.01)
 
-    return channels_situation
+    lambda_in_arr = []
+    lambda_out_arr = []
+    avg_delay_arr = []
 
+    # for lambd in lambdas:
+    #     if VERBOSE: print(f"\n====( λ = {lambd} )======")
+    #     aloha_conv = AlohaConv(lambd, SLOTS, USERS_COUNT, VERBOSE)
 
-def calc_user_groups(feedback: BS_feedback) -> tuple[Group, Group]:
-    group1 = {}
-    group2 = {}
+    #     _, _ = aloha_conv.run_theory()
+    #     lambda_in, lambda_out, avg_delay = aloha_conv.run_simulation()
 
-    # Probability assignment according to the Group (I or II)
-    for channel, users in feedback.items():
-        if len(users) == 1:
-            contention_free_user = users.pop()
-            contention_free_user.p = 1
-            group1[channel] = {contention_free_user}
-        else:
-            for user_in_contention in users:
-                user_in_contention.p = P_dtp
-            group2[channel] = users
+    #     lambda_in_arr.append(lambda_in)
+    #     lambda_out_arr.append(lambda_out)
+    #     avg_delay_arr.append(avg_delay)
 
-    return group1, group2
+    # print(f"\n{lambda_in_arr}")
+    # print(f"\n{lambdas}")
+    # print(f"\n{lambda_out_arr}")
 
+    # plt.plot(lambdas, lambda_out_arr)
+    # plt.title('Зависимость пропускной способности от интенсивности вх. потока')
+    # plt.xlabel('Input arrival rate')
+    # plt.ylabel('T(λ)')
 
-def users_in_contention_change_channel(group2: Group) -> Group:
-    available_channels = set(group2.keys())
-    users_in_contention = set()
-    for users in group2.values():
-        users_in_contention.update(users)
+    # plt.figure()
 
-    new_group2 = {}
-    for user in users_in_contention:
-        user.change_channel(available_channels)
-        if user.channel not in new_group2:
-            new_group2[user.channel] = {user}
-        else:
-            new_group2[user.channel].add(user)
+    # plt.plot(lambdas, avg_delay_arr)
+    # plt.title('Зависимость задержки от интенсивности вх. потока')
+    # plt.xlabel('Input arrival rate')
+    # plt.ylabel('Delay')
 
-    return new_group2
+    # plt.show()
 
+    for lambd in lambdas:
+        if VERBOSE: print(f"\n====( λ = {lambd} )======")
+        mch_aloha_ep = MultichannelAlohaEP(lambd, SLOTS, USERS_COUNT, 
+                                         CHANNELS_COUNT, EP_LEN, VERBOSE)
 
-def data_transmission_phase(group1, group2: Group, cur_slot) -> BS_response:
-    base_station_response = [num for num in range(CHANNELS)]
+        _, _ = mch_aloha_ep.run_theory()
+        lambda_in, lambda_out, avg_delay = mch_aloha_ep.run_simulation()
 
-    for channel, user in group1.items():
-        contention_free_user = user.pop()
-        contention_free_user.decide_transmit_packet()
+        lambda_in_arr.append(lambda_in)
+        lambda_out_arr.append(lambda_out)
+        avg_delay_arr.append(avg_delay)
 
-        base_station_response[channel] = RESPONSE_OK
-        contention_free_user.get_response_from_BS(RESPONSE_OK, cur_slot)
+    print(f"\n{lambda_in_arr}")
+    print(f"\n{lambdas}")
+    print(f"\n{lambda_out_arr}")
 
-    for channel, users in group2.items():
-        if len(users) == 0:
-            base_station_response[channel] = RESPONSE_EMPTY
+    plt.plot(lambdas, lambda_out_arr)
+    plt.title('Зависимость пропускной способности от интенсивности вх. потока')
+    plt.xlabel('Input arrival rate')
+    plt.ylabel('T(λ)')
 
-        elif len(users) == 1:
-            contention_free_user = users.pop()
-            contention_free_user.decide_transmit_packet()
+    plt.figure()
 
-            base_station_response[channel] = RESPONSE_OK
-            contention_free_user.get_response_from_BS(RESPONSE_OK, cur_slot)
+    plt.plot(lambdas, avg_delay_arr)
+    plt.title('Зависимость задержки от интенсивности вх. потока')
+    plt.xlabel('Input arrival rate')
+    plt.ylabel('Delay')
 
-        else:
-            users_decisions = {}
-            for user in users:
-                users_decisions[user] = user.decide_transmit_packet()
-
-            # No one decided to transmit packet
-            if all(decision is False for decision in list(users_decisions.values())):
-                base_station_response[channel] = RESPONSE_EMPTY
-            # Everyone decided to transmit packet
-            elif all(decision is True for decision in list(users_decisions.values())):
-                base_station_response[channel] = RESPONSE_CONFLICT
-                for user in users:
-                    user.get_response_from_BS(RESPONSE_CONFLICT, cur_slot)
-            # Someone decided to transmit packet, but someone did not
-            else:
-                if list(users_decisions.values()).count(True) == 1:
-                    contention_free_user = None
-                    for user, decision in users_decisions.items():
-                        if decision is True:
-                            contention_free_user = user
-                            break
-
-                    base_station_response[channel] = RESPONSE_OK
-                    contention_free_user.get_response_from_BS(RESPONSE_OK, cur_slot)
-                else:
-                    for user, decision in users_decisions.items():
-                        if decision is True:
-                            base_station_response[channel] = RESPONSE_CONFLICT
-                            user.get_response_from_BS(RESPONSE_CONFLICT, cur_slot)
-
-    return base_station_response
-
-
-def simulation():
-    users = [User(id_) for id_ in range(USERS_COUNT)]
-
-    for cur_slot in range(SLOTS):
-
-        print(f'{Fore.YELLOW}Slot #{cur_slot}:{Style.RESET_ALL}')
-        generate_requests(users, cur_slot)
-        feedback = exploration_phase(users)
-        print(f'Users make next choice: ...')
-        group1, group2 = calc_user_groups(feedback)
-        print(f'So: ...')
-        new_group2 = users_in_contention_change_channel(group2)
-        print(f'New choices for users in group2: ...')
-        base_stations_response = data_transmission_phase(group1, new_group2, cur_slot)
-
-    requests_overall = 0
-    lambda_out = 0
-
-    for user in users:
-        lambda_out += len(user.sent_data_packets)
-        requests_overall += (len(user.data_packets_to_send) + len(user.sent_data_packets))
-
-    print(f'\033[92mLamb_in: {requests_overall / SLOTS}')
-    print(f'Lamb_out: {lambda_out / SLOTS}\n')
-
-    print(f'Average delay: {calculate_average_delay(users)}\033[0m')
-
-    plt.figure(1)
-    plt.axhline(y=LAMBDA, color='grey', linestyle='--')
-    plt.grid(True)
-    plt.xlabel('Timeline')
-    plt.ylabel('Lambda')
-
-    plt.legend(['Lambda_1', 'Lambda_2'])
     plt.show()
 
-
 if __name__ == '__main__':
-    simulation()
+    main()
