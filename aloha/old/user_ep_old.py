@@ -1,7 +1,7 @@
 import random
 from numpy.random import poisson
 
-from aloha.data_packet import DataPacket
+from aloha.user import DataPacket
 from aloha.utils import BS_feedback, ChannelList
 from consts import RESPONSE_OK
 

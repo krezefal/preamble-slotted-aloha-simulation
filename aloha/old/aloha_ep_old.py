@@ -1,6 +1,6 @@
 import math
 
-from aloha.user_conv import User
+from aloha.old.user_conv import User
 from aloha import utils
 
 from aloha.utils import BS_feedback, Group, BS_response

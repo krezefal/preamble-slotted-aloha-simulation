@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.random import poisson
 
-from aloha.data_packet import DataPacket
+from aloha.user import DataPacket
 from consts import RESPONSE_OK, RESPONSE_CONFLICT
 
 
