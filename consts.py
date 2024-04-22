@@ -2,19 +2,20 @@ import numpy as np
 
 
 # SIM CONSTANTS
-SLOTS = 10000
+SLOTS = 20000
 
-DTP_LEN=1
-MAX_EP_LEN=3
-LEN_STEP=1
-# SLOTS_LEN = EP_LEN + DTP_LEN
-SLOTS_LEN = np.arange(DTP_LEN, MAX_EP_LEN+DTP_LEN+1, LEN_STEP)
+CH_NUM = np.arange(1, 4, 1)
+
+DTP_LEN = 1
+MIN_EP_LEN = 0
+MAX_EP_LEN = 1
+EP_LEN_STEP = 0.5
+# SLOTS_LEN is EP_LEN with DTP_LEN
+SLOTS_LEN = np.arange(DTP_LEN, MAX_EP_LEN+DTP_LEN+EP_LEN_STEP, EP_LEN_STEP)
 
 MAX_LAMBD = 2
-LAMBD_STEP = 0.1
-LAMBDAS = np.arange(0.05, MAX_LAMBD, LAMBD_STEP)
-
-CH_NUM = np.arange(1, 7, 1)
+LAMBD_STEP = 0.05
+LAMBDAS = np.arange(LAMBD_STEP, MAX_LAMBD+LAMBD_STEP, LAMBD_STEP)
 
 RESPONSE_EMPTY = 0
 RESPONSE_OK = 1
@@ -22,7 +23,7 @@ RESPONSE_CONFLICT = 2
 
 
 # MATH CONSTANTS
-INFINITY = 100
+INFINITY = 10
 
 
 # PROG CONSTANTS
@@ -30,7 +31,8 @@ ROUNDING = 4
 PLOT_HIDE_PERCENT = 0.0
 MOVING_AVG_FACTOR = 10
 VERBOSE = False
-DISABLE_THEORY = True
+DISABLE_THEORY = False
 DISABLE_SIM = False
-SAVE_PATH="/Users/timofeyklimov/Desktop/SUAI Master/НИР/Ход работы/preamble-slotted-aloha-simulation.nosync/graphs"
-TIMESTAMP="%d-%m-%y-%H-%M-%S"
+RUS_TITLES = True
+SAVE_PATH = "/Users/timofeyklimov/Desktop/SUAI Master/НИР/Ход работы/preamble-slotted-aloha-simulation.nosync/graphs/py"
+TIMESTAMP = "%d-%m-%y-%H-%M-%S"

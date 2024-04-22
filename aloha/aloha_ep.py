@@ -5,7 +5,8 @@ from decimal import Decimal
 
 from aloha.user import UniqUser
 from aloha import utils
-from consts import RESPONSE_EMPTY, RESPONSE_OK, RESPONSE_CONFLICT, INFINITY
+from consts import RESPONSE_EMPTY, RESPONSE_OK, RESPONSE_CONFLICT, INFINITY, \
+    RUS_TITLES
 
 
 class MultichannelAlohaEP:
@@ -79,7 +80,10 @@ class MultichannelAlohaEP:
 
         # Run simulation
         for cur_slot in range(self.slots):
-            if self.verbose: print(f"\n>>> SLOT #{cur_slot}:")
+            if self.verbose: 
+                if RUS_TITLES: print(f"\n>>> ОКНО #{cur_slot}:")
+                else: print(f"\n>>> SLOT #{cur_slot}:")
+
             bs_response = self._run_frame(
                 poisson_dist, 
                 active_users, 
@@ -109,7 +113,8 @@ class MultichannelAlohaEP:
 
         if len(active_users) == 0: 
             if self.verbose:
-                print("No active users in the current slot")
+                if RUS_TITLES: print("В текущем окне нет заявок")
+                else: print("No active users in the current slot")
             return [RESPONSE_EMPTY for _ in range(self.ch_count)]
         
         # Exploration phase
@@ -122,7 +127,8 @@ class MultichannelAlohaEP:
                 ch_situation[channel].add(user)
 
         if self.verbose:
-            print("Users make next choice:")
+            if RUS_TITLES: print("Абоненты выбрали следующие каналы:")
+            else: print("Users make next choice:")
             utils.print_channels_situation(ch_situation)
         
         # EP: split active users who decide to transmit a preamble into 2 
@@ -149,7 +155,8 @@ class MultichannelAlohaEP:
                 group_conflict[new_channel].add(user)
 
             if self.verbose:
-                print("Users in contention reselect channels:")
+                if RUS_TITLES: print("Конфликтующие абоненты заново выбрали каналы")
+                else: print("Users in contention reselect channels:")
                 utils.print_channels_situation(group_conflict)
 
         # Data transmission phase

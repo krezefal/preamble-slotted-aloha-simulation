@@ -11,11 +11,18 @@ def simulate_system_per_slot_len(ch_num: int):
     lambda_out_diff_slot_len_sim = []
     avg_delay_diff_slot_len_sim = []
 
-    print(f"CHANNELS NUM = {ch_num}:")
+    if RUS_TITLES:
+        print(f"КОЛ-ВО КАНАЛОВ = {ch_num}:")
+    else:
+        print(f"CHANNELS NUM = {ch_num}:")
 
     for i, slot_len in enumerate(SLOTS_LEN):
 
-        print(f"Simulation iteration #{i+1}: slot len = {slot_len} \
+        if RUS_TITLES:
+            print(f"\nИтерация #{i+1}: длина окна = {slot_len} \
+(ФИ={slot_len-DTP_LEN}, ФП={DTP_LEN})")
+        else:
+            print(f"\nIteration #{i+1}: slot len = {slot_len} \
 (EP={slot_len-DTP_LEN}, DTP={DTP_LEN})")
 
         lambda_out_th_arr = []
@@ -23,8 +30,9 @@ def simulate_system_per_slot_len(ch_num: int):
         avg_delay_arr = []
 
         for lambd in LAMBDAS:
-            #if VERBOSE: print(f"\n====( λ = {lambd} )======")
-            print(f"\n====( λ = {lambd} )======")
+            #if VERBOSE:
+            print(f"======( λ = {round(lambd, ROUNDING)} )======")
+            
             mch_aloha_ep = MultichannelAlohaEP(lambd, SLOTS, slot_len, ch_num, 
                                                VERBOSE, DISABLE_THEORY, 
                                                DISABLE_SIM)
@@ -51,19 +59,26 @@ def simulate_system_per_slot_len(ch_num: int):
             lambd_in = np.round(
                 LAMBDAS[lambda_out_diff_slot_len_theory[i].\
                         index(max_throughput_diff_slot_len[i])], ROUNDING)
-            print(f"Max T(λ) over iteration #{i+1} = {t_lambd} (λ={lambd_in})")
+            
+            if RUS_TITLES:
+                print(f"Макс. T(λ) на итерации #{i+1} = {t_lambd} (λ={lambd_in})")
+            else:
+                print(f"Max T(λ) over iteration #{i+1} = {t_lambd} (λ={lambd_in})")
 
+    label = "Длина окна = %.2f"
+    if RUS_TITLES: label = "Slot len = %.2f"
+    
     # T(λ) theory
-    plot_throughput_theory(ch_num, lambda_out_diff_slot_len_theory)
+    plot_throughput_theory(ch_num, lambda_out_diff_slot_len_theory, label)
     
     #ma_len = int(len(LAMBDAS) * LAMBD_STEP * MOVING_AVG_FACTOR)
     #x_lim_right = LAMBDAS[-1] - LAMBDAS[-1] * PLOT_HIDE_PERCENT
 
     # T(λ) sim
-    plot_throughput_sim(ch_num, lambda_out_diff_slot_len_sim)
+    plot_throughput_sim(ch_num, lambda_out_diff_slot_len_sim, label)
     
     # Delay sim
-    plot_delay_sim(ch_num, avg_delay_diff_slot_len_sim)
+    plot_delay_sim(ch_num, avg_delay_diff_slot_len_sim, label)
 
 
 def main():

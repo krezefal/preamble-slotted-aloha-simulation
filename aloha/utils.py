@@ -4,7 +4,7 @@ from prettytable import PrettyTable
 from colorama import Fore, Style
 
 from aloha.user import UniqUser
-from consts import RESPONSE_EMPTY, RESPONSE_OK
+from consts import RESPONSE_EMPTY, RESPONSE_OK, RUS_TITLES
 
 
 def generate_stream(lambd: float, slots: int, slot_len: float, 
@@ -25,9 +25,14 @@ def generate_stream(lambd: float, slots: int, slot_len: float,
         slot_num = np.ceil(t / slot_len) 
         poisson_dist[int(slot_num)] += 1
 
-    if verbose: 
-        print(f"REQUESTS TIMESTAMPS:\n{timestamps}\n")
-        print(f"ACTIVE USERS IN SLOTS (slot length = {slot_len}):\n\
+    if verbose:
+        if RUS_TITLES:
+            print(f"ВРЕМЕННЫЕ МЕТКИ:\n{timestamps}\n")
+            print(f"АКТИВНОСТЬ АБОНЕНТОВ ПО ОКНАМ (длина окна = {slot_len}):\n\
+{poisson_dist}")
+        else:
+            print(f"REQUESTS TIMESTAMPS:\n{timestamps}\n")
+            print(f"ACTIVE USERS IN SLOTS (slot length = {slot_len}):\n\
 {poisson_dist}")
 
     return poisson_dist
@@ -44,32 +49,52 @@ def calc_avg_delay(sent_data_packets: list[UniqUser]) -> float:
 
 
 def print_channels_situation(ch_dict: dict[int, set[UniqUser]]):
+    chan_no = "Channel #"
+    usr_id_header =  "Users ID"
+
+    if RUS_TITLES:
+        chan_no = "Канал №"
+        usr_id_header = "Номер абонента"
+
     table = PrettyTable()
-    table.field_names = ["Channel #", "Users ID"]
+    table.field_names = [chan_no, usr_id_header]
     for chan, users in ch_dict.items():
         table.add_row([chan] + [[user.id_ for user in users]])
     print(table)
 
 
 def print_bs_response(bs_response: int | list[int]):
+    empty, ok, conflict = "EMP", "OK", "CON"
+    bs_resp_str = "Base station response"
+    chan_no = "Channel #"
+    resp_header = "Response"
+
+    if RUS_TITLES:
+        empty = "П"
+        ok = "У"
+        conflict = "К"
+        bs_resp_str = "Ответ от БС"
+        chan_no = "Канал №"
+        resp_header = "Ответ"
+
     if isinstance(bs_response, int):
         if bs_response == RESPONSE_EMPTY:
-            print(f"Base station response: {Fore.LIGHTBLACK_EX}EMP{Style.RESET_ALL}")
+            print(f"{bs_resp_str}: {Fore.LIGHTBLACK_EX}{empty}{Style.RESET_ALL}")
         elif bs_response == RESPONSE_OK:
-            print(f"Base station response: {Fore.GREEN}OK{Style.RESET_ALL}")
+            print(f"{bs_resp_str}: {Fore.GREEN}{ok}{Style.RESET_ALL}")
         else:
-            print(f"Base station response: {Fore.RED}CON{Style.RESET_ALL}")
+            print(f"{bs_resp_str}: {Fore.RED}{conflict}{Style.RESET_ALL}")
     else:
-        print("Base station response:")
+        print(f"{bs_resp_str}:")
         table = PrettyTable()
-        table.field_names = ["Channel #", "Response"]
+        table.field_names = [chan_no, resp_header]
         for chan, event in enumerate(bs_response):
             if event == RESPONSE_EMPTY:
-                table.add_row([chan] + [Fore.LIGHTBLACK_EX + 'EMP'+ Style.RESET_ALL])
+                table.add_row([chan] + [Fore.LIGHTBLACK_EX + empty + Style.RESET_ALL])
             elif event == RESPONSE_OK:
-                table.add_row([chan] + [Fore.GREEN + 'OK' + Style.RESET_ALL])
+                table.add_row([chan] + [Fore.GREEN + ok + Style.RESET_ALL])
             else:
-                table.add_row([chan] + [Fore.RED + 'CON' + Style.RESET_ALL])
+                table.add_row([chan] + [Fore.RED + conflict + Style.RESET_ALL])
         print(table)
 
 
