@@ -1,0 +1,32 @@
+CHANNELS NUM = 1:
+Simulation iteration #1: slot len = 1 (EP=0, DTP=1)
+Simulation iteration #2: slot len = 2 (EP=1, DTP=1)
+Simulation iteration #3: slot len = 3 (EP=2, DTP=1)
+Simulation iteration #4: slot len = 4 (EP=3, DTP=1)
+
+Max T(λ) over iteration #1 = 0.5482 (λ=1.77)
+Max T(λ) over iteration #2 = 0.5482 (λ=0.89)
+Мах T(λ) over iteration #3 = 0.5482 (λ=0.59)
+Мах T(λ) over iteration #4 = 0.5482 (λ=0.44)
+
+CHANNELS NUM = 2:
+Simulation iteration #1: slot len = 1 (EP=0, DTP=1)
+Simulation iteration #2: slot len = 2 (EP=1, DTP=1)
+Simulation iteration #3: slot len = 3 (EP=2, DTP=1)
+Simulation iteration #4: slot len = 4 (EP=3, DTP=1)
+
+Max T(λ) over iteration #1 = 0.578 (λ=1.54)
+Max T(λ) over iteration #2 = 0.578 (λ=0.77)
+Max T(λ) over iteration #3 = 0.578 (λ=0.51)
+Max T(λ) over iteration #4 = 0.578 (λ=0.39)
+
+CHANNELS NUM = 3:
+Simulation iteration #1: slot len = 1 (EP=0, DTP=1)
+Simulation iteration #2: slot len = 2 (EP=1, DTP=1)
+Simulation iteration #3: slot len = 3 (EP=2, DTP=1)
+Simulation iteration #4: slot len = 4 (EP=3, DTP=1)
+
+Max T(λ) over iteration #1 = 0.5917 (λ=1.42)
+Max T(λ) over iteration #2 = 0.5917 (λ=0.71)
+Max T(λ) over iteration #3 = 0.5917 (λ=0.47)
+Max T(λ) over iteration #4 = 0.5916 (λ=0.35)
