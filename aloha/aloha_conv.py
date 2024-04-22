@@ -17,7 +17,8 @@ class AlohaConv:
         self.id_counter = 0
 
 
-    def run_theory(self) -> tuple[float, float, float]:
+    def run_theory(self) -> float:
+        lambda_out_theory = 0.0
         # l = self.lambd
         # M = self.channels
         # # K = self.users_count
@@ -27,7 +28,7 @@ class AlohaConv:
         # max_throughput = M * math.e ** (-1) # 2 ((10) in article)
         # input_arrival_rate = l * math.e ** (- l/M)
         # return max_throughput, input_arrival_rate
-        return 0.0, 0.0, 0.0
+        return lambda_out_theory
 
 
     def run_simulation(self) -> tuple[float, float, float]:

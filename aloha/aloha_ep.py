@@ -1,38 +1,74 @@
-import numpy as np
+import math
 import random
+import numpy as np
+from decimal import Decimal
 
 from aloha.user import UniqUser
 from aloha import utils
-from consts import RESPONSE_EMPTY, RESPONSE_OK, RESPONSE_CONFLICT
+from consts import RESPONSE_EMPTY, RESPONSE_OK, RESPONSE_CONFLICT, INFINITY
 
 
 class MultichannelAlohaEP:
     def __init__(self, lambd: float, slots, slot_len: float, ch_count: int, 
-                 ep_len: float, verbose=False):
+                 verbose=False, disable_theory=False, disable_sim=False):
         self.lambd = lambd
         self.slots = slots
         self.slot_len = slot_len
         self.ch_count = ch_count
-        self.ep_len = ep_len
+
         self.verbose = verbose
+        self.disable_theory = disable_theory
+        self.disable_sim = disable_sim
 
         self.id_counter = 0
 
 
-    def run_theory(self):
-        # l = self.lambd
-        # M = self.channels
-        # # K = self.users_count
-        # # K = (l/M) / (1 - l/M) # Erlang
+    def calc_throughput(self) -> float:
+        if self.disable_theory:
+            return 0.0
+        
+        term1 = self.slot_len * self.lambd * \
+            math.e ** (-self.slot_len * self.lambd)
 
-        # # max_throughput = K * math.e ** (-K/M) # 1 ((10) in article)
-        # max_throughput = M * math.e ** (-1) # 2 ((10) in article)
-        # input_arrival_rate = l * math.e ** (- l/M)
-        # return max_throughput, input_arrival_rate
-        return 0.0, 0.0, 0.0
+        term2 = 0.0 
+        for l in range(1, self.ch_count+1):
+            multiplier1 = math.comb(self.ch_count-1, l-1) * \
+                (self.slot_len * self.lambd) ** (self.ch_count-l) * \
+                math.e ** (-self.slot_len * self.lambd * self.ch_count)
+            
+            multiplier2 = self._calc_multiplier2(l)
+            term2 += multiplier1*multiplier2
+
+        return term1 + term2
+    
+    
+    def _calc_multiplier2(self, l: int) -> float:
+        multiplier2 = 0.0
+        for users_in_channels in utils.generate_users_in_channels(INFINITY, l):
+            if sum(users_in_channels) == 0 or 1 in users_in_channels: 
+                continue
+
+            usr_sum = sum(users_in_channels)
+
+            tmp = 0.0
+            if usr_sum <= l:
+                tmp = (usr_sum / l) * (1 - 1/l) ** (usr_sum - 1)
+            else:
+                tmp = (1 - 1/usr_sum) ** (usr_sum - 1)
+            
+            tmp1 = Decimal(np.power(self.slot_len * self.lambd, usr_sum))
+            tmp2 = Decimal(utils.factorial_product(users_in_channels))
+            tmp *= float(tmp1 / tmp2)
+            
+            multiplier2 += tmp
+        
+        return multiplier2
 
 
     def run_simulation(self) -> tuple[float, float, float]:
+        if self.disable_sim:
+            return 0.0, 0.0, 0.0
+
         # Init runtime data
         poisson_dist = utils.generate_stream(self.lambd, 
                                               self.slots, 
@@ -43,7 +79,7 @@ class MultichannelAlohaEP:
 
         # Run simulation
         for cur_slot in range(self.slots):
-            if self.verbose: print(f"\n>>> SLOT #{cur_slot+1}:")
+            if self.verbose: print(f"\n>>> SLOT #{cur_slot}:")
             bs_response = self._run_frame(
                 poisson_dist, 
                 active_users, 
@@ -133,7 +169,7 @@ class MultichannelAlohaEP:
             else:
                 active_users_decisions = {}
                 P_dtp = min(1, (self.ch_count - len(group_success)) / 
-                            len(group_conflict))
+                            self._users_in(group_conflict))
                 for user in users:
                     active_users_decisions[user] = np.random.rand() < P_dtp
 
@@ -164,3 +200,10 @@ class MultichannelAlohaEP:
             if len(users) != 0:
                 return False
         return True
+    
+
+    def _users_in(self, group: dict[int, set[UniqUser]]) -> int:
+        amount = 0
+        for users in group.values():
+            amount += len(users)
+        return amount

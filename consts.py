@@ -1,10 +1,36 @@
-# SIMULATION CONSTS
-SLOTS = 10000
-SLOT_LEN = 2
-CHANNELS_COUNT = 1
-VERBOSE = False
+import numpy as np
 
-# BS RESPONSE
+
+# SIM CONSTANTS
+SLOTS = 10000
+
+DTP_LEN=1
+MAX_EP_LEN=3
+LEN_STEP=1
+# SLOTS_LEN = EP_LEN + DTP_LEN
+SLOTS_LEN = np.arange(DTP_LEN, MAX_EP_LEN+DTP_LEN+1, LEN_STEP)
+
+MAX_LAMBD = 2
+LAMBD_STEP = 0.1
+LAMBDAS = np.arange(0.05, MAX_LAMBD, LAMBD_STEP)
+
+CH_NUM = np.arange(1, 7, 1)
+
 RESPONSE_EMPTY = 0
 RESPONSE_OK = 1
 RESPONSE_CONFLICT = 2
+
+
+# MATH CONSTANTS
+INFINITY = 100
+
+
+# PROG CONSTANTS
+ROUNDING = 4
+PLOT_HIDE_PERCENT = 0.0
+MOVING_AVG_FACTOR = 10
+VERBOSE = False
+DISABLE_THEORY = True
+DISABLE_SIM = False
+SAVE_PATH="/Users/timofeyklimov/Desktop/SUAI Master/НИР/Ход работы/preamble-slotted-aloha-simulation.nosync/graphs"
+TIMESTAMP="%d-%m-%y-%H-%M-%S"

@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from prettytable import PrettyTable
 from colorama import Fore, Style
@@ -70,3 +71,37 @@ def print_bs_response(bs_response: int | list[int]):
             else:
                 table.add_row([chan] + [Fore.RED + 'CON' + Style.RESET_ALL])
         print(table)
+
+
+def moving_average(data, window_size):
+    moving_averages = []
+    for i in range(len(data) - window_size + 1):
+        window = data[i:i+window_size]
+        window_average = sum(window) / window_size
+        moving_averages.append(window_average)
+
+    moving_averages += data[len(data) - window_size + 1:]
+
+    return moving_averages
+
+
+def factorial_product(arr: list[int]) -> int:
+    result = 1
+    for el in arr:
+        result *= math.factorial(el)
+    return result
+
+
+def generate_users_in_channels(upper_lim, l: int):
+    def gen_combs_recursion(curr_combination, depth):
+        if depth == l:
+            yield curr_combination.copy()
+            return
+        
+        for num in range(upper_lim):
+            curr_combination.append(num)
+            yield from gen_combs_recursion(curr_combination, depth + 1)
+            curr_combination.pop()
+    
+    initial_combination = []
+    yield from gen_combs_recursion(initial_combination, 0)

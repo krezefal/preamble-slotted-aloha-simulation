@@ -1,68 +1,78 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-#from aloha.aloha_conv import AlohaConv
 from aloha.aloha_ep import MultichannelAlohaEP
-from consts import SLOTS, SLOT_LEN, CHANNELS_COUNT, VERBOSE
+from plotting import *
+from consts import *
+
+
+def simulate_system_per_slot_len(ch_num: int):
+    lambda_out_diff_slot_len_theory = []
+    lambda_out_diff_slot_len_sim = []
+    avg_delay_diff_slot_len_sim = []
+
+    print(f"CHANNELS NUM = {ch_num}:")
+
+    for i, slot_len in enumerate(SLOTS_LEN):
+
+        print(f"Simulation iteration #{i+1}: slot len = {slot_len} \
+(EP={slot_len-DTP_LEN}, DTP={DTP_LEN})")
+
+        lambda_out_th_arr = []
+        lambda_out_arr = []
+        avg_delay_arr = []
+
+        for lambd in LAMBDAS:
+            #if VERBOSE: print(f"\n====( λ = {lambd} )======")
+            print(f"\n====( λ = {lambd} )======")
+            mch_aloha_ep = MultichannelAlohaEP(lambd, SLOTS, slot_len, ch_num, 
+                                               VERBOSE, DISABLE_THEORY, 
+                                               DISABLE_SIM)
+
+            # lambda_out_th == T(λ)
+            lambda_out_th = mch_aloha_ep.calc_throughput()
+            lambda_out_th_arr.append(lambda_out_th)
+
+            _, lambda_out_sim, avg_delay_sim = mch_aloha_ep.run_simulation()
+            lambda_out_arr.append(lambda_out_sim)
+            avg_delay_arr.append(avg_delay_sim)
+
+        lambda_out_diff_slot_len_theory.append(lambda_out_th_arr)
+        lambda_out_diff_slot_len_sim.append(lambda_out_arr)
+        avg_delay_diff_slot_len_sim.append(avg_delay_arr)
+
+    max_throughput_diff_slot_len = [max(cur_lambda_out_th_arr) for 
+        cur_lambda_out_th_arr in lambda_out_diff_slot_len_theory]
+    
+    if not DISABLE_THEORY:
+        print()
+        for i, slot_len in enumerate(SLOTS_LEN):
+            t_lambd = round(max_throughput_diff_slot_len[i], ROUNDING)
+            lambd_in = np.round(
+                LAMBDAS[lambda_out_diff_slot_len_theory[i].\
+                        index(max_throughput_diff_slot_len[i])], ROUNDING)
+            print(f"Max T(λ) over iteration #{i+1} = {t_lambd} (λ={lambd_in})")
+
+    # T(λ) theory
+    plot_throughput_theory(ch_num, lambda_out_diff_slot_len_theory)
+    
+    #ma_len = int(len(LAMBDAS) * LAMBD_STEP * MOVING_AVG_FACTOR)
+    #x_lim_right = LAMBDAS[-1] - LAMBDAS[-1] * PLOT_HIDE_PERCENT
+
+    # T(λ) sim
+    plot_throughput_sim(ch_num, lambda_out_diff_slot_len_sim)
+    
+    # Delay sim
+    plot_delay_sim(ch_num, avg_delay_diff_slot_len_sim)
 
 
 def main():
-    plt.close('all')
-
-    lambdas = np.arange(0.1, 4, 0.005)
-
-    lambda_in_arr = []
-    lambda_out_arr = []
-    avg_delay_arr = []
-
-    for lambd in lambdas:
-        if VERBOSE: print(f"\n====( λ = {lambd} )======")
-        mch_aloha_ep = MultichannelAlohaEP(lambd, SLOTS, SLOT_LEN, 
-                                           CHANNELS_COUNT, VERBOSE)
-
-        _, _, _ = mch_aloha_ep.run_theory()
-        lambda_in, lambda_out, avg_delay = mch_aloha_ep.run_simulation()
-
-        # aloha_conv = AlohaConv(lambd, SLOTS, SLOT_LEN, VERBOSE)
-
-        # _, _, _ = aloha_conv.run_theory()
-        # lambda_in, lambda_out, avg_delay = aloha_conv.run_simulation()
-
-        lambda_in_arr.append(lambda_in)
-        lambda_out_arr.append(lambda_out)
-        avg_delay_arr.append(avg_delay)
-
-    print(f"\n{lambda_in_arr}")
-    print(f"\n{lambdas}")
-    print(f"\n{lambda_out_arr}")
-
-    plt.plot(lambdas, lambda_out_arr)
-    plt.title('Зависимость пропускной способности от интенсивности вх. потока')
-    plt.xlabel('Input arrival rate')
-    plt.ylabel('T(λ)')
-
-    plt.figure()
-
-    plt.plot(lambdas, avg_delay_arr)
-    plt.title('Зависимость задержки от интенсивности вх. потока')
-    plt.xlabel('Input arrival rate')
-    plt.ylabel('Delay')
-    #plt.ylim(0, 18)
+    for ch_num in CH_NUM:
+        simulate_system_per_slot_len(ch_num)
+        print()
 
     plt.show()
 
-    ########### Single lambda ##############
-
-    # lambd = 0.9
-
-    # aloha_conv = AlohaConv(lambd, SLOTS, SLOT_LEN, VERBOSE)
-    # _, _, _ = aloha_conv.run_theory()
-    # lambda_in, lambda_out, avg_delay = aloha_conv.run_simulation()
-
-    # print()
-    # print(f"{lambda_in}")
-    # print(f"{lambda_out}")
-    # print(f"{avg_delay}")
 
 if __name__ == '__main__':
     main()
