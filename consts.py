@@ -2,19 +2,19 @@ import numpy as np
 
 
 # SIM CONSTANTS
-SLOTS = 20000
+SLOTS = 5000
 
-CH_NUM = np.arange(1, 4, 1)
+CH_NUM = np.arange(7, 11, 1)
 
-DTP_LEN = 1
-MIN_EP_LEN = 0
-MAX_EP_LEN = 1
-EP_LEN_STEP = 0.5
+DTP_LEN = 1.0
+MIN_EP_LEN = 0.0
+MAX_EP_LEN = 1.0
+EP_LEN_STEP = 0.1
 # SLOTS_LEN is EP_LEN with DTP_LEN
-SLOTS_LEN = np.arange(DTP_LEN, MAX_EP_LEN+DTP_LEN+EP_LEN_STEP, EP_LEN_STEP)
+SLOTS_LEN = np.arange(DTP_LEN+MIN_EP_LEN, MAX_EP_LEN+DTP_LEN+EP_LEN_STEP, EP_LEN_STEP)
 
-MAX_LAMBD = 2
-LAMBD_STEP = 0.05
+MAX_LAMBD = 2.0
+LAMBD_STEP = 0.01
 LAMBDAS = np.arange(LAMBD_STEP, MAX_LAMBD+LAMBD_STEP, LAMBD_STEP)
 
 RESPONSE_EMPTY = 0
@@ -32,7 +32,6 @@ PLOT_HIDE_PERCENT = 0.0
 MOVING_AVG_FACTOR = 10
 VERBOSE = False
 DISABLE_THEORY = False
-DISABLE_SIM = False
+DISABLE_SIM = True
 RUS_TITLES = True
-SAVE_PATH = "/Users/timofeyklimov/Desktop/SUAI Master/НИР/Ход работы/preamble-slotted-aloha-simulation.nosync/graphs/py"
-TIMESTAMP = "%d-%m-%y-%H-%M-%S"
+SAVE_PATH = "./graphs/py"
