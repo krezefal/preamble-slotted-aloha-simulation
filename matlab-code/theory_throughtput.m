@@ -4,17 +4,17 @@ close all;
 %% CONSTS
 % SIM CONSTANTS
 
-CH_NUM = 1:6;
+CH_NUM = 6:10;
 
 DTP_LEN = 1;
 MIN_EP_LEN = 0;
 MAX_EP_LEN = 1;
-EP_LEN_STEP = 0.25;
+EP_LEN_STEP = 0.1;
 % SLOTS_LEN is EP_LEN with DTP_LEN
 SLOTS_LEN = DTP_LEN+MIN_EP_LEN:EP_LEN_STEP:DTP_LEN+MAX_EP_LEN;
 
 MAX_LAMBD = 2;
-LAMBD_STEP = 0.005;
+LAMBD_STEP = 0.01;
 LAMBDAS = 0:LAMBD_STEP:MAX_LAMBD;
 
 % MATH CONSTANTS
@@ -22,6 +22,7 @@ INFINITY = 10;
 
 % PROG CONSTANTS
 ROUNDING = '%.4f';
+SAVE_PATH = strcat('../graphs/matlab');
 
 
 %% CALCULATING T(λ)  
@@ -37,8 +38,8 @@ for i = 1:length(CH_NUM)
     hold on;
     for j = 1:length(SLOTS_LEN)
         slot_len = SLOTS_LEN(j);
-        format_str = sprintf(['Итерация моделирования #%d: длина окна ' ...
-            '= %s (EP=%s, DTP=%s)\n'], j, ROUNDING, ROUNDING, ROUNDING);
+        format_str = sprintf(['Итерация расчета #%d: длина окна ' ...
+            '= %s (ФИ=%s, ФП=%s)\n'], j, ROUNDING, ROUNDING, ROUNDING);
         fprintf(format_str, slot_len, slot_len-DTP_LEN, DTP_LEN);
 
         throughputs = zeros(1, length(LAMBDAS));
@@ -71,15 +72,19 @@ for i = 1:length(CH_NUM)
     fprintf('\n')
 
     hold off;
-    legend;
+    legend('Location', 'southeast');
     xlabel('Интенсивность вх. потока');
     ylabel('T(λ)');
-    xlim([0, inf])
-    ylim([0, inf])
+    xlim('auto')
+    ylim('auto')
     title_str = sprintf(['Зависимость пропускной способности от ' ...
         'интенсивности вх. потока\n(аналитический расчет, кол-во ' ...
-        'каналов %d'], ch_num);
+        'каналов %d)'], ch_num);
     title(title_str);
+    filename = sprintf('/%dch_lambd_step_%.4f_throughput_theory', ...
+        ch_num, LAMBD_STEP);
+    savefig([SAVE_PATH, filename, '.fig']);
+    saveas(gcf, [SAVE_PATH, filename, '.png']);
 end
 
 function throughput = calc_throughput(lambda, slot_len, ch_num, INFINITY)
@@ -95,7 +100,7 @@ function throughput = calc_throughput(lambda, slot_len, ch_num, INFINITY)
         term2 = term2 + multiplier1 * multiplier2;
     end
     
-    throughput = term1 + term2;
+    throughput = (term1 + term2) / slot_len;
 end
 
 function multiplier2 = calc_multiplier2(l, lambd, slot_len, INFINITY)

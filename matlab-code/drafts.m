@@ -58,17 +58,41 @@ for i = 1:l
 end
 
 % Create a grid of indices
-[indices{:}] = ndgrid(indices{:});
+%[indices{:}] = ndgrid(indices{:});
 %disp(ndgrid(indices{:}))
 
 % Concatenate the indices into a single matrix
-combinations = cat(l+1, indices{:});
+%combinations = cat(l+1, indices{:});
 
 % Reshape the matrix to have one combination per row
-combinations = reshape(combinations, [], l);
+%combinations = reshape(combinations, [], l);
 
 % Display the combinations
 %disp(combinations);
+
+% Вызов функции с передачей переменной по ссылке
+variable = struct('Value', 10);  % Создание хэндла для переменной
+modifyVariable(variable);
+disp(variable.Value);
+
+randomNumber = randi([1, 100000]);
+disp(randomNumber);
+
+disp(((-1 / 0.8) * (log(rand()))))
+disp(ceil(0.8))
+
+myArray = [];
+% Цикл для добавления значений
+for i = 1:4
+    disp(myArray);
+    newValue = i * 2; % Некоторое новое значение
+    %myArray = horzcat(myArray, newValue);
+    myArray = [myArray, newValue];% Добавление нового значения в конец массива
+end
+
+% Вывод массива
+disp(myArray);
+disp(randi(3))
 
 for i = 1:length(frequencies)
     % Цикл для отрисовки синусоид с разными амплитудами
@@ -85,14 +109,14 @@ for i = 1:length(frequencies)
     title(title_str); % Заголовок
 end
 
-combinations = generate_combinations2(m, l);
-[~, num_combs] = size(combinations);
-disp(num_combs)
-for i = 1:num_combs
-    disp(sum(combinations{i}))
-    % users_in_channels = combinations{1}(i);
-    % disp(sum(users_in_channels))
-end
+% combinations = generate_combinations2(m, l);
+% [~, num_combs] = size(combinations);
+% disp(num_combs)
+% for i = 1:num_combs
+%     %disp(sum(combinations{i}))
+%     % users_in_channels = combinations{1}(i);
+%     % disp(sum(users_in_channels))
+% end
 
 function plot_sin_with_amplitude(frequence, amplitude)
     num_samples = 100; % Количество выборок
@@ -167,3 +191,6 @@ function combinations = generate_combinations2(m, l)
     combinations = generate_combinations_helper(initial_combination, 0);
 end
 
+function modifyVariable(x)
+    x.Value = x.Value * 2;  % Изменение переменной через хэндл
+end
