@@ -1,7 +1,6 @@
 import math
 import random
 import numpy as np
-from decimal import Decimal
 
 from aloha.user import UniqUser
 from aloha import utils
@@ -40,7 +39,7 @@ class MultichannelAlohaEP:
             multiplier2 = self._calc_multiplier2(l)
             term2 += multiplier1*multiplier2
 
-        return term1 + term2
+        return (term1 + term2) / self.slot_len
     
     
     def _calc_multiplier2(self, l: int) -> float:
@@ -57,9 +56,9 @@ class MultichannelAlohaEP:
             else:
                 tmp = (1 - 1/usr_sum) ** (usr_sum - 1)
             
-            tmp1 = Decimal(np.power(self.slot_len * self.lambd, usr_sum))
-            tmp2 = Decimal(utils.factorial_product(users_in_channels))
-            tmp *= float(tmp1 / tmp2)
+            numerator = np.power(self.slot_len * self.lambd, usr_sum)
+            denominator = utils.factorial_product(users_in_channels)
+            tmp *= float(numerator / denominator)
             
             multiplier2 += tmp
         
@@ -71,7 +70,7 @@ class MultichannelAlohaEP:
             return 0.0, 0.0, 0.0
 
         # Init runtime data
-        poisson_dist = utils.generate_stream(self.lambd, 
+        timestamps, poisson_dist = utils.generate_stream(self.lambd, 
                                               self.slots, 
                                               self.slot_len,
                                               self.verbose)
@@ -81,7 +80,7 @@ class MultichannelAlohaEP:
         # Run simulation
         for cur_slot in range(self.slots):
             if self.verbose: 
-                if RUS_TITLES: print(f"\n>>> ОКНО #{cur_slot}:")
+                if RUS_TITLES: print(f"\n>>> СЛОТ #{cur_slot}:")
                 else: print(f"\n>>> SLOT #{cur_slot}:")
 
             bs_response = self._run_frame(
@@ -93,8 +92,9 @@ class MultichannelAlohaEP:
 
         # Calculate system params
         # Data packet == unique user in case of infinite number of users
-        lambda_in = (len(sent_data_packets) + len(active_users)) / self.slots
-        lambda_out = len(sent_data_packets) / self.slots
+        total_time = timestamps[-1]
+        lambda_in = (len(sent_data_packets) + len(active_users)) / total_time
+        lambda_out = len(sent_data_packets) / total_time
         avg_delay = utils.calc_avg_delay(sent_data_packets)
 
         return lambda_in, lambda_out, avg_delay
@@ -113,7 +113,7 @@ class MultichannelAlohaEP:
 
         if len(active_users) == 0: 
             if self.verbose:
-                if RUS_TITLES: print("В текущем окне нет заявок")
+                if RUS_TITLES: print("В текущем слоте нет заявок")
                 else: print("No active users in the current slot")
             return [RESPONSE_EMPTY for _ in range(self.ch_count)]
         
@@ -181,7 +181,7 @@ class MultichannelAlohaEP:
                     active_users_decisions[user] = np.random.rand() < P_dtp
 
                 # No one decided to transmit packet
-                if all(dec is False for dec in 
+                if all(dec == False for dec in 
                        list(active_users_decisions.values())):
                     bs_response[channel] = RESPONSE_EMPTY
                 # Someone decided to transmit packet
@@ -189,7 +189,7 @@ class MultichannelAlohaEP:
                     if list(active_users_decisions.values()).count(True) == 1:
                         bs_response[channel] = RESPONSE_OK
                         for user, decision in active_users_decisions.items():
-                            if decision is True:
+                            if decision == True:
                                 
                                 user_data_packet = active_users.pop(user.id_)
                                 user_data_packet.processed(cur_slot)
