@@ -18,12 +18,15 @@ def simulate_system_per_slot_len(ch_num: int):
 
     for i, slot_len in enumerate(SLOTS_LEN):
 
+        slot_len = round(slot_len, ROUNDING)
+        ep_len = round(slot_len - DTP_LEN, ROUNDING)
+
         if RUS_TITLES:
-            print(f"\nИтерация #{i+1}: длина окна = {slot_len} \
-(ФИ={slot_len-DTP_LEN}, ФП={DTP_LEN})")
+            print(f"Итерация #{i+1}: длина слота = {slot_len} \
+(ФИ={ep_len}, ФП={DTP_LEN})")
         else:
-            print(f"\nIteration #{i+1}: slot len = {slot_len} \
-(EP={slot_len-DTP_LEN}, DTP={DTP_LEN})")
+            print(f"Iteration #{i+1}: slot len = {slot_len} \
+(EP={ep_len}, DTP={DTP_LEN})")
 
         lambda_out_th_arr = []
         lambda_out_arr = []
@@ -31,7 +34,7 @@ def simulate_system_per_slot_len(ch_num: int):
 
         for lambd in LAMBDAS:
             #if VERBOSE:
-            print(f"======( λ = {round(lambd, ROUNDING)} )======")
+            #    print(f"======( λ = {round(lambd, ROUNDING)} )======")
             
             mch_aloha_ep = MultichannelAlohaEP(lambd, SLOTS, slot_len, ch_num, 
                                                VERBOSE, DISABLE_THEORY, 
@@ -65,8 +68,8 @@ def simulate_system_per_slot_len(ch_num: int):
             else:
                 print(f"Max T(λ) over iteration #{i+1} = {t_lambd} (λ={lambd_in})")
 
-    label = "Длина окна = %.2f"
-    if RUS_TITLES: label = "Slot len = %.2f"
+    label = "Длина слота = "
+    if not RUS_TITLES: label = "Slot len = "
     
     # T(λ) theory
     plot_throughput_theory(ch_num, lambda_out_diff_slot_len_theory, label)

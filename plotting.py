@@ -1,5 +1,5 @@
-from datetime import datetime
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
 #from aloha.utils import moving_average
 from consts import *
@@ -11,9 +11,11 @@ def plot_throughput_theory(ch_num: int,
     if DISABLE_THEORY:
         return
     
+    plt.figure(figsize=(12, 8))
     for i, slot_len in enumerate(SLOTS_LEN):
+        slot_len = round(slot_len, ROUNDING)
         plt.plot(LAMBDAS, lambda_out_th_diff_slot_len[i], 
-                 label = label % slot_len)
+                 label = label + str(slot_len))
         
     if RUS_TITLES:
         plt.title(f'Зависимость пропускной способности от интенсивности вх. \
@@ -27,9 +29,11 @@ channels num {ch_num})')
         plt.ylabel('T(λ)')
 
     plt.legend()
-    plt.savefig(f"{SAVE_PATH}/{datetime.now().strftime(TIMESTAMP)}-{ch_num}\
-ch_throughput_theory.png")
-    plt.figure()
+    plt.grid(True, linewidth=0.25, which='both')
+    plt.gca().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.savefig(f"{SAVE_PATH}/{ch_num}ch_lambd_step_{LAMBD_STEP}\
+_throughput_theory.png")
     
 
 def plot_throughput_sim(ch_num: int,
@@ -38,10 +42,11 @@ def plot_throughput_sim(ch_num: int,
     if DISABLE_SIM:
         return
     
+    plt.figure(figsize=(12, 8))
     for i, slot_len in enumerate(SLOTS_LEN):
-        plt.plot(LAMBDAS, 
-                 lambda_out_diff_slot_len_sim[i], 
-                 label = label % slot_len)
+        slot_len = round(slot_len, ROUNDING)
+        plt.plot(LAMBDAS, lambda_out_diff_slot_len_sim[i],
+                 label = label + str(slot_len))
     
     if RUS_TITLES:
         plt.title(f'Зависимость пропускной способности от интенсивности вх. \
@@ -55,9 +60,11 @@ channels num {ch_num})')
         plt.ylabel('T(λ)')
 
     plt.legend()
-    plt.savefig(f"{SAVE_PATH}/{datetime.now().strftime(TIMESTAMP)}-{ch_num}\
-ch_throughput_sim.png")
-    plt.figure()
+    plt.grid(True, linewidth=0.25, which='both')
+    plt.gca().xaxis.set_major_locator(MultipleLocator(0.1))
+    plt.gca().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.savefig(f"{SAVE_PATH}/{ch_num}ch_lambd_step_{LAMBD_STEP}\
+_slots_{SLOTS}_throughput_sim.png")
 
 
 def plot_delay_sim(ch_num: int, 
@@ -66,9 +73,11 @@ def plot_delay_sim(ch_num: int,
     if DISABLE_SIM:
         return
     
+    plt.figure(figsize=(12, 8))
     for i, slot_len in enumerate(SLOTS_LEN):
+        slot_len = round(slot_len, ROUNDING)
         plt.plot(LAMBDAS, avg_delay_diff_slot_len_sim[i], 
-                 label = label % slot_len)
+                 label = label + str(slot_len))
 
     if RUS_TITLES:
         plt.title(f'Зависимость задержки от интенсивности вх. потока\
@@ -83,6 +92,8 @@ channels num {ch_num})')
 
     plt.ylim(0, 20)
     plt.legend()
-    plt.savefig(f"{SAVE_PATH}/{datetime.now().strftime(TIMESTAMP)}-{ch_num}\
-ch_delay_sim.png")
-    plt.figure()
+    plt.grid(True, linewidth=0.25, which='both')
+    plt.gca().xaxis.set_major_locator(MultipleLocator(0.1))
+    #plt.gca().yaxis.set_major_locator(MultipleLocator(0.05))
+    plt.savefig(f"{SAVE_PATH}/{ch_num}ch_lambd_step_{LAMBD_STEP}\
+_slots_{SLOTS}_delay_sim.png")
