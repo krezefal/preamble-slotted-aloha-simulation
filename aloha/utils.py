@@ -8,7 +8,7 @@ from consts import RESPONSE_EMPTY, RESPONSE_OK, RUS_TITLES
 
 
 def generate_stream(lambd: float, slots: int, slot_len: float, 
-                    verbose: bool) -> list[int]:
+                    verbose: bool) -> tuple[list[int], list[int]]:
     poisson_dist = [0] * slots
     cur_timestamp = 0.0
     timestamps = []
@@ -28,14 +28,14 @@ def generate_stream(lambd: float, slots: int, slot_len: float,
     if verbose:
         if RUS_TITLES:
             print(f"ВРЕМЕННЫЕ МЕТКИ:\n{timestamps}\n")
-            print(f"АКТИВНОСТЬ АБОНЕНТОВ ПО ОКНАМ (длина окна = {slot_len}):\n\
-{poisson_dist}")
+            print(f"АКТИВНОСТЬ АБОНЕНТОВ ПО СЛОТАМ (длина слота = \
+{slot_len}):\n{poisson_dist}")
         else:
             print(f"REQUESTS TIMESTAMPS:\n{timestamps}\n")
             print(f"ACTIVE USERS IN SLOTS (slot length = {slot_len}):\n\
 {poisson_dist}")
 
-    return poisson_dist
+    return timestamps, poisson_dist
 
 
 def calc_avg_delay(sent_data_packets: list[UniqUser]) -> float:
