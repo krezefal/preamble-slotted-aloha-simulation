@@ -4,7 +4,7 @@ INFINITY = 10;
 disp(calc_throughput(1.775, 1, 1)); % 0.5482
 disp(calc_throughput(0.836, 1.6, 4)); % 0.3739
 disp(calc_throughput(0.62, 2, 6)); % 0.3016
-disp(calc_throughput(1, 1, 10)); % didn't check manually
+disp(calc_throughput(1, 1, 10)); % 0.5972 - didn't check manually
 
 
 function throughput = calc_throughput(lambda, slot_len, ch_num)
