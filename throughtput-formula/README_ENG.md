@@ -4,14 +4,14 @@ Theoretical formula for calculating throughput for an arbitrary number of
  channels and slots duration:
 
  <p align="center">
-    <img src="etc/throughtput_img.png" alt />
+    <img src="etc/throughtput_formula_img.png" alt />
 </p>
 
 , where
 ```
-t - slot duration (usually, equals to 1);
 λ - input arrival rate intensity;
 K - number of channels (K >= 1);
+d - slot duration (usually, equals to 1);
 I{statement} - indicator function, taking the following values: 1 - true, 0 - false
 ```
 
@@ -19,7 +19,7 @@ To normalize output rate intensity value per time, it is needed to include
  duration of the slot *t* in the formula above: 
 
 <p align="center">
-    <img src="etc/normalized_thr_img.png" width="30%" height="30%" />
+    <img src="etc/normalized_throughput_formula_img.png" width="30%" height="30%" />
 </p>
 
 ## Implementaiton
