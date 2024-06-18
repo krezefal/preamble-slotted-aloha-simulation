@@ -85,6 +85,15 @@ def calc_lambda_out_theoretically(slot_len, lambd: float) -> float:
     return lambd_out / slot_len
 
 
+def calc_pr_success_from_g_1_ch(g: float) -> float:
+    pr_s = 0.0
+    for i in range(1, INFINITY):
+        multiplier1 = g ** i * math.e ** (-g) / math.factorial(i)
+        multiplier2 = (1 - 1/i) ** (i - 1)
+        pr_s += multiplier1*multiplier2
+    return pr_s
+
+
 def calc_lambda_out_theoretically_debug(slot_len, lambd: float) \
     -> tuple[float, list[float], list[float]]:
 
