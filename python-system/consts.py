@@ -2,33 +2,33 @@ import numpy as np
 
 
 # SIM CONSTANTS
-SLOTS = 50000
+SLOTS = 70000
 CH_NUM = 1
 
 DTP_LEN = 1.0
 MIN_EP_LEN = 0.0
-MAX_EP_LEN = 1.0
+MAX_EP_LEN = 1
 EP_LEN_STEP = 0.5
 # SLOTS_LEN is EP_LEN with DTP_LEN.
 SLOTS_LEN = \
     np.arange(DTP_LEN+MIN_EP_LEN, MAX_EP_LEN+DTP_LEN+EP_LEN_STEP, EP_LEN_STEP)
 
 # 1 channel
-G_OPT_ARR = [1.771, 1.181, 0.885]
-# G_OPT_ARR = [1.771, 1.771, 1.771]
+# G_OPT_ARR = [1.771, 1.181, 0.885]
 # 2 channels
 # G_OPT_ARR = [1.543, 1.029, 0.771]
 # 3 channels
 # G_OPT_ARR = [1.416, 0.944, 0.708]
 
+G_OPT_ARR = [1.771] * 3
+
 # COLORS are used for graphs per each slot len in a plot. If number of slots is
 # higher than colors, the random one will be used.
-#COLORS = ['#ff3d33', '#2baebf', '#40bd40', '#dd8335', '#de3384']
 COLORS = ['#ff3d33', '#2baebf', '#dd8335']
 
 MAX_LAMBD = 1
 LAMBD_STEP = 0.01
-LAMBDAS = np.arange(0.01, MAX_LAMBD+LAMBD_STEP, LAMBD_STEP)
+LAMBDAS = np.arange(LAMBD_STEP, MAX_LAMBD+LAMBD_STEP, LAMBD_STEP)
 
 
 # MATH CONSTANTS

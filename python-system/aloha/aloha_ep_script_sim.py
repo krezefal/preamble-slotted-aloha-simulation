@@ -87,7 +87,7 @@ def run_frame(g_param, slot_len: float,
     # Exploration phase
     # EP: active users choosing channels
     if SIM_P_EP_EQ_ONE: P_ep = 1
-    else: P_ep = min(1, (ch_num  * g_param * slot_len) / len(active_users))
+    else: P_ep = min(1, (ch_num  * g_param) / len(active_users))
 
     for user in active_users.values():
         if np.random.rand() < P_ep:

@@ -5,33 +5,37 @@ import concurrent.futures
 INFINITY = 10
 
 
-def calc_throughput(lambd, slot_len: float, ch_num: int) -> float:
+def calc_throughput(lambd, slot_len: float, ch_num: int, parallel=False) \
+    -> float:
     
     term1 = slot_len * lambd * \
         math.e ** (-slot_len * lambd)
-
     term2 = 0.0
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        running_tasks = []
-        for l in range(1, ch_num+1):
-            task = executor.submit(calc_multipliers_independently, l, ch_num, 
-                                   lambd, slot_len)
-            running_tasks.append(task)
-        
-        for running_task in running_tasks:
-            m1, m2 = running_task.result()
-            term2 += m1*m2
 
-    # DEPRECATED APPROACH - may crash on high ch_num
-    # base = [[]]
-    # for l in range(1, ch_num+1):
-    #     multiplier1 = math.comb(ch_num-1, l-1) * \
-    #         (slot_len * lambd) ** (ch_num-l) * \
-    #         math.e ** (-slot_len * lambd * ch_num)
-        
-    #     multiplier2, base = \
-    #         calc_multiplier2_with_base(l, lambd, slot_len, base)
-    #     term2 += multiplier1*multiplier2
+    if parallel:
+        print('Parallel mode')
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            running_tasks = []
+            for l in range(1, ch_num+1):
+                task = executor.submit(calc_multipliers_independently, l, 
+                                       ch_num, lambd, slot_len)
+                running_tasks.append(task)
+            
+            for running_task in running_tasks:
+                m1, m2 = running_task.result()
+                term2 += m1*m2
+
+    else:
+        print('Sequential mode')
+        base = [[]]
+        for l in range(1, ch_num+1):
+            multiplier1 = math.comb(ch_num-1, l-1) * \
+                (slot_len * lambd) ** (ch_num-l) * \
+                math.e ** (-slot_len * lambd * ch_num)
+            
+            multiplier2, base = \
+                calc_multipliers_with_base(l, lambd, slot_len, base)
+            term2 += multiplier1*multiplier2
 
     return (term1 + term2) / slot_len
 
@@ -87,17 +91,45 @@ def generate_users_in_channels(upper_lim, l: int):
     yield from gen_combs_recursion(initial_combination, 0)
 
 
-# def generate_users_in_channels_from_base(upper_lim, l: int, 
-#                                          base: list[list[int]]) \
-#                                             -> list[list[int]]:
+def calc_multipliers_with_base(l: int, lambd, slot_len: float, \
+                               base:list[list[int]])  \
+                               -> tuple[float, list[list[int]]]:
+
+    multiplier2 = 0.0
+    users_comb_arr = generate_users_in_channels_from_base(INFINITY, l, base)
+
+    for users_in_channels in users_comb_arr:
+        if sum(users_in_channels) == 0:
+            continue
+
+        usr_sum = sum(users_in_channels)
+
+        tmp = 0.0
+        if usr_sum <= l:
+            tmp = (usr_sum / l) * (1 - 1/l) ** (usr_sum - 1)
+        else:
+            tmp = (1 - 1/usr_sum) ** (usr_sum - 1)
+
+        numerator = (slot_len * lambd) ** usr_sum
+        denominator = factorial_product(users_in_channels)
+        tmp *= float(numerator / denominator)
+        
+        multiplier2 += tmp
     
-#     if l == 1:
-#         return [[num] for num in range(upper_lim) if num != 1]
+    return multiplier2, users_comb_arr
 
-#     users_comb_arr = [cur_comb + [num] for cur_comb in base 
-#                       for num in range(upper_lim) if num != 1]
 
-#     return users_comb_arr
+def generate_users_in_channels_from_base(upper_lim, l: int, 
+                                         base: list[list[int]]) \
+                                            -> list[list[int]]:
+    
+    if l == 1:
+        return [[num] for num in range(upper_lim) if num != 1]
+
+    users_comb_arr = [cur_comb + [num] for cur_comb in base 
+                      for num in range(upper_lim) if num != 1]
+
+    return users_comb_arr
 
 
 def factorial_product(arr: list[int]) -> int:
@@ -108,14 +140,24 @@ def factorial_product(arr: list[int]) -> int:
 
 
 def main():
+    # Test values run
     # print(calc_throughput(lambd=1.775, slot_len=1, ch_num=1)) # 0.5482
     # print(calc_throughput(lambd=0.836, slot_len=1.6, ch_num=4)) # 0.3739
     # print(calc_throughput(lambd=0.62, slot_len=2, ch_num=6)) # 0.3016
 
+    # Run in sequential mode
     start_time = time.time()
-    print(calc_throughput(lambd=1, slot_len=1, ch_num=7))
+    print(f"Res: \
+{calc_throughput(lambd=1, slot_len=1, ch_num=8, parallel=False)}")
     end_time = time.time()
-    print(f"{end_time - start_time} sec")
+    print(f"Exec time: {end_time - start_time} sec\n")
+
+    # Run in parallel mode
+    start_time = time.time()
+    print(f"Res: \
+{calc_throughput(lambd=1, slot_len=1, ch_num=8, parallel=True)}")
+    end_time = time.time()
+    print(f"Exec time: {end_time - start_time} sec")
 
 
 if __name__ == '__main__':

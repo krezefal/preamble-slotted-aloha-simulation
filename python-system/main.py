@@ -41,7 +41,7 @@ def run_theory() -> tuple[list[list[float]], list[float], list[float], str]:
         else:
             print(f"Max T(λ) over iteration #{i+1} = {max_thr} (λ={lambd_in})")
 
-    label = "Длина слота = "
+    label = "длительность ФИ = "
     if not RUS_TITLES: label = "Slot len = "
 
     return lambda_out_th_diff_slot_len, max_throughput_diff_slot_len, \
@@ -134,7 +134,7 @@ slot len")
 
     labels = [''] * 3
 
-    if RUS_TITLES: labels[SLOT_LEN_IDX] = "Длина слота = "
+    if RUS_TITLES: labels[SLOT_LEN_IDX] = "Длительность ФИ = "
     else: labels[SLOT_LEN_IDX] = "Slot len = "
 
     labels[G_1_IDX]= "G = 1"

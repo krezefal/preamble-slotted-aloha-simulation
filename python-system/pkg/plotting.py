@@ -5,7 +5,7 @@ from pkg import utils
 from consts import *
 
 
-Y_LIM_DELAY = 30
+Y_LIM_DELAY = 40
 PLOT_DARK_FACTOR = 0.7
 
 
@@ -17,7 +17,7 @@ def plot_throughput_theory(lambda_out_th_diff_slot_len: list[list[float]],
     plt.figure(figsize=(12, 8))
     for i, slot_len in enumerate(SLOTS_LEN):
         slot_len = round(slot_len, ROUNDING)
-        slot_len_label = label + str(slot_len)
+        slot_len_label = label + str(slot_len-1)
 
         if i < len(COLORS): color = COLORS[i]
         else: color = utils.generate_random_color_rgb()
@@ -26,26 +26,29 @@ def plot_throughput_theory(lambda_out_th_diff_slot_len: list[list[float]],
 
         plt.plot(LAMBDAS, lambda_out_th_diff_slot_len[i], 
                  label = slot_len_label, color=color, linestyle='-')
-        # plt.hlines(y=max_throughput_diff_slot_len[i], 
-        #            xmin=0, xmax=argmax_lambd_in_diff_slot_len[i], 
-        #            colors=color, linewidth=0.8, linestyle='--')
-        # plt.vlines(x=argmax_lambd_in_diff_slot_len[i], 
-        #            ymin=0, ymax=max_throughput_diff_slot_len[i],
-        #            color=color, linewidth=0.8, linestyle='--')
+        # plt.plot(argmax_lambd_in_diff_slot_len[i], \
+        #          max_throughput_diff_slot_len[i], 'o', color=color)
+        plt.hlines(y=max_throughput_diff_slot_len[i], 
+                   xmin=0, xmax=argmax_lambd_in_diff_slot_len[i], 
+                   colors=color, linewidth=0.8, linestyle='--')
+        plt.vlines(x=argmax_lambd_in_diff_slot_len[i], 
+                   ymin=0, ymax=max_throughput_diff_slot_len[i],
+                   color=color, linewidth=0.8, linestyle='--')
 
 
     if RUS_TITLES:
-        plt.title(f'Зависимость пропускной способности от интенсивности вх. \
-потока\n(аналитический расчет системы с потерями, кол-во каналов {CH_NUM})')
-        plt.xlabel('Интенсивность вх. потока')
-        plt.ylabel('T(λ)')  
+        plt.title('Зависимость максимальной интенсивности \nвых. потока от \
+интенсивности вх. потока \nпри разных длительностях ФИ в режиме с потерями', 
+fontsize=20)
+        plt.xlabel('Интенсивность вх. потока на 1 кадр', fontsize=20)
+        plt.ylabel('T(λ)', fontsize=20)  
     else:
         plt.title(f'Throughput on the input arrival rate\n(theoretically \
 calculations of lossy system, channels num {CH_NUM})')
         plt.xlabel('Input arrival rate')
         plt.ylabel('T(λ)')
 
-    plt.legend()
+    plt.legend(fontsize=16)
 
     plt.ylim(bottom=0)
     plt.xlim(left=0)
